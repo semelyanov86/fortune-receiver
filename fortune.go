@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("err - can not read json - %s", err)
 	}
 	data = bytes.Replace(data, []byte("\r"), []byte(""), -1)
-	data = bytes.Replace(data, []byte("\n"), []byte(""), -1)
+	data = bytes.Replace(data, []byte("\n"), []byte("\\n"), -1)
 	dec := charmap.Windows1251.NewDecoder()
 	utf8Bytes, _, err := transform.Bytes(dec, data)
 	if err != nil {
