@@ -21,6 +21,7 @@ func main() {
 	var key int
 	var fortune FortuneResult
 	flag.IntVar(&key, "type", 4, "Type of fortune")
+	flag.Parse()
 	result, err := http.Get("http://rzhunemogu.ru/RandJSON.aspx?CType=" + strconv.Itoa(key))
 	if err != nil {
 		log.Fatal(err)
