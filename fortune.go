@@ -13,38 +13,62 @@ import (
 	"strconv"
 )
 
-type FortuneResult struct {
-	Content string
+type LiveGetWebRequest struct {
 }
 
-func main() {
-	var key int
+func (g LiveGetWebRequest) FetchBytes(typeFort int) ([]byte, error) {
+	url := "http://rzhunemogu.ru/RandJSON.aspx?CType=" + strconv.Itoa(typeFort)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return []byte{}, err
+	}
+	req.Header.Set("User-Agent", "Conky-Fortune-Ext")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return []byte{}, err
+	}
+	if res.StatusCode != http.StatusOK {
+		log.Fatalf("Wrong status code: %d", res.StatusCode)
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return body, nil
+}
+
+func getFortune(getWebRequest GetWebRequest, typeFort int) (string, error) {
 	var fortune FortuneResult
-	flag.IntVar(&key, "type", 4, "Type of fortune")
-	flag.Parse()
-	result, err := http.Get("http://rzhunemogu.ru/RandJSON.aspx?CType=" + strconv.Itoa(key))
+	body, err := getWebRequest.FetchBytes(typeFort)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	if result.StatusCode != http.StatusOK {
-		log.Fatalf("Wrong status code: %d", result.StatusCode)
-	}
-	data, err := io.ReadAll(result.Body)
-	if err != nil {
-		log.Fatalf("err - can not read json - %s", err)
-	}
-	data = bytes.Replace(data, []byte("\r"), []byte(""), -1)
+	data := bytes.Replace(body, []byte("\r"), []byte(""), -1)
 	data = bytes.Replace(data, []byte("\n"), []byte("\\n"), -1)
 	dec := charmap.Windows1251.NewDecoder()
 	utf8Bytes, _, err := transform.Bytes(dec, data)
 	if err != nil {
-		log.Fatalf("err - can not change encoding - %s", err)
+		return "", err
 	}
 	err = json.Unmarshal(utf8Bytes, &fortune)
 	if err != nil {
-		log.Fatalf("err - can not decode - %s", err)
+		return "", err
 	}
-	content := fortune.Content
+	return fortune.Content, err
+}
+
+func main() {
+	var key int
+	flag.IntVar(&key, "type", 4, "Type of fortune")
+	flag.Parse()
+	liveClient := LiveGetWebRequest{}
+	content, err := getFortune(liveClient, key)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println(content)
 }
