@@ -40,29 +40,31 @@ func (g LiveGetWebRequest) FetchBytes(typeFort int) ([]byte, error) {
 	return body, nil
 }
 
-func getFortune(getWebRequest GetWebRequest, typeFort int) (string, error) {
+func getFortune(getWebRequest GetWebRequest, typeFort int) (FortuneResult, error) {
 	var fortune FortuneResult
 	body, err := getWebRequest.FetchBytes(typeFort)
 	if err != nil {
-		return "", err
+		return fortune, err
 	}
 	data := bytes.Replace(body, []byte("\r"), []byte(""), -1)
 	data = bytes.Replace(data, []byte("\n"), []byte("\\n"), -1)
 	dec := charmap.Windows1251.NewDecoder()
 	utf8Bytes, _, err := transform.Bytes(dec, data)
 	if err != nil {
-		return "", err
+		return fortune, err
 	}
 	err = json.Unmarshal(utf8Bytes, &fortune)
 	if err != nil {
-		return "", err
+		return fortune, err
 	}
-	return fortune.Content, err
+	return fortune, err
 }
 
 func main() {
 	var key int
+	var maxLength int
 	flag.IntVar(&key, "type", 4, "Type of fortune")
+	flag.IntVar(&maxLength, "length", 60, "Max length of string")
 	flag.Parse()
 	liveClient := LiveGetWebRequest{}
 	content, err := getFortune(liveClient, key)
@@ -70,5 +72,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(content)
+	fmt.Println(content.splitString(maxLength))
 }
