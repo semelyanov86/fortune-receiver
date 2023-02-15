@@ -12,6 +12,8 @@ Script for displaying random fortune for conky app.
 ${offset 0}${font Noto Sans:size=10}${execi 500 cat ~/random.log}
 ```
 
+You can pass length string param in command line
+
 ## Splitting long string to multiline
 In this script implemented splitString function, that splits a long multiline string into multiple lines by a maximum string length.
 

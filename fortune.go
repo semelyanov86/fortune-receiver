@@ -64,7 +64,7 @@ func main() {
 	var key int
 	var maxLength int
 	flag.IntVar(&key, "type", 4, "Type of fortune")
-	flag.IntVar(&maxLength, "length", 60, "Max length of string")
+	flag.IntVar(&maxLength, "length", 85, "Max length of string")
 	flag.Parse()
 	liveClient := LiveGetWebRequest{}
 	content, err := getFortune(liveClient, key)
