@@ -1,11 +1,14 @@
 package main
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 type testWebRequest struct {
 }
 
-func (t testWebRequest) FetchBytes(typeFort int) ([]byte, error) {
+func (t testWebRequest) FetchBytes(ctx context.Context, typeFort int) ([]byte, error) {
 	return []byte(`{"content":"this is test"}`), nil
 }
 

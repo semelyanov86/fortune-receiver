@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -11,14 +12,16 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type LiveGetWebRequest struct {
 }
 
-func (g LiveGetWebRequest) FetchBytes(typeFort int) ([]byte, error) {
+func (g LiveGetWebRequest) FetchBytes(ctx context.Context, typeFort int) ([]byte, error) {
 	url := "http://rzhunemogu.ru/RandJSON.aspx?CType=" + strconv.Itoa(typeFort)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+
 	if err != nil {
 		return []byte{}, err
 	}
@@ -42,7 +45,9 @@ func (g LiveGetWebRequest) FetchBytes(typeFort int) ([]byte, error) {
 
 func getFortune(getWebRequest GetWebRequest, typeFort int) (FortuneResult, error) {
 	var fortune FortuneResult
-	body, err := getWebRequest.FetchBytes(typeFort)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	body, err := getWebRequest.FetchBytes(ctx, typeFort)
 	if err != nil {
 		return fortune, err
 	}

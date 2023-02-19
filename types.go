@@ -1,9 +1,12 @@
 package main
 
-import "strings"
+import (
+	"context"
+	"strings"
+)
 
 type GetWebRequest interface {
-	FetchBytes(typeFort int) ([]byte, error)
+	FetchBytes(ctx context.Context, typeFort int) ([]byte, error)
 }
 
 type FortuneResult struct {
